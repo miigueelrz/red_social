@@ -6,6 +6,7 @@ import (
 
 	"red_social/internal/config"
 	"red_social/internal/handlers"
+	"red_social/internal/middleware"
 	"red_social/internal/repositories"
 	"red_social/internal/services"
 )
@@ -24,8 +25,15 @@ func main() {
 
 	userRepo := repositories.NewUserRepository(db)
 	sessionRepo := repositories.NewSessionRepository(db)
+	postRepo := repositories.NewPostRepository(db)
+
 	authService := services.NewAuthService(userRepo)
+	postService := services.NewPostService(postRepo)
+
 	authHandler := handlers.NewAuthHandler(authService, sessionRepo)
+	postHandler := handlers.NewPostHandler(postService)
+	authMiddleware := middleware.NewAuthMiddleware(sessionRepo)
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
@@ -37,6 +45,9 @@ func main() {
 	mux.HandleFunc("POST /register", authHandler.RegisterPOST)
 	mux.HandleFunc("GET /login", authHandler.LoginGET)
 	mux.HandleFunc("POST /login", authHandler.LoginPOST)
+
+	mux.Handle("GET /", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleGetTimeline)))
+	mux.Handle("POST /posts", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleCreatePost)))
 
 	addr := ":" + cfg.Port
 	log.Printf("Servidor escuchando en %s", addr)

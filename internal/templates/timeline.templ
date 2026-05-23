@@ -1,0 +1,43 @@
+package templates
+
+import (
+	"red_social/internal/models"
+	"time"
+)
+
+templ Timeline(posts []models.Post) {
+	<div class="max-w-2xl mx-auto py-8 px-4">
+		<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+			<form hx-post="/posts" hx-target="#post-list" hx-swap="afterbegin" hx-on::after-request="this.reset()" class="flex flex-col gap-4">
+				<textarea name="content" placeholder="¿Qué está pasando?" class="w-full resize-none border-0 focus:ring-0 p-2 text-gray-800 text-lg outline-none bg-transparent" rows="3" required></textarea>
+				<div class="flex justify-end items-center border-t border-gray-100 pt-4">
+					<button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full transition-colors duration-200">Publicar</button>
+				</div>
+			</form>
+		</div>
+		<div id="post-list" class="flex flex-col gap-6">
+			for _, post := range posts {
+				@PostItem(post)
+			}
+		</div>
+	</div>
+}
+
+templ PostItem(post models.Post) {
+	<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all hover:shadow-md">
+		<div class="flex items-center gap-3 mb-4">
+			<div class="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl uppercase shadow-inner">
+				if len(post.Author) > 0 {
+					{ string(post.Author[0]) }
+				} else {
+					?
+				}
+			</div>
+			<div class="flex flex-col">
+				<span class="font-bold text-gray-900 text-lg">{ post.Author }</span>
+				<span class="text-sm text-gray-500">{ post.CreatedAt.Format(time.RFC822) }</span>
+			</div>
+		</div>
+		<div class="text-gray-800 whitespace-pre-wrap text-base leading-relaxed">{ post.Content }</div>
+	</div>
+}
