@@ -5,7 +5,9 @@ import (
 	"net/http"
 
 	"red_social/internal/config"
+	"red_social/internal/handlers"
 	"red_social/internal/repositories"
+	"red_social/internal/services"
 )
 
 func main() {
@@ -20,12 +22,21 @@ func main() {
 	}
 	defer db.Close()
 
+	userRepo := repositories.NewUserRepository(db)
+	sessionRepo := repositories.NewSessionRepository(db)
+	authService := services.NewAuthService(userRepo)
+	authHandler := handlers.NewAuthHandler(authService, sessionRepo)
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("ok"))
 	})
+
+	mux.HandleFunc("GET /register", authHandler.RegisterGET)
+	mux.HandleFunc("POST /register", authHandler.RegisterPOST)
+	mux.HandleFunc("GET /login", authHandler.LoginGET)
+	mux.HandleFunc("POST /login", authHandler.LoginPOST)
 
 	addr := ":" + cfg.Port
 	log.Printf("Servidor escuchando en %s", addr)
