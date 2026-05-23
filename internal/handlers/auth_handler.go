@@ -102,3 +102,28 @@ func (h *AuthHandler) LoginPOST(w http.ResponseWriter, r *http.Request) {
 	component := templates.FormSuccess("Inicio de sesión exitoso")
 	component.Render(r.Context(), w)
 }
+
+func (h *AuthHandler) LogoutPOST(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session_token")
+	if err == nil {
+		hash := sha256.Sum256([]byte(cookie.Value))
+		tokenHash := hex.EncodeToString(hash[:])
+
+		session, err := h.sessionRepo.GetSessionByTokenHash(tokenHash)
+		if err == nil && session != nil {
+			h.sessionRepo.DeleteSession(session.ID)
+		}
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_token",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+		MaxAge:   -1,
+	})
+
+	w.Header().Set("HX-Redirect", "/login")
+}

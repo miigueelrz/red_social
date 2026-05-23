@@ -46,6 +46,8 @@ func main() {
 	mux.HandleFunc("GET /login", authHandler.LoginGET)
 	mux.HandleFunc("POST /login", authHandler.LoginPOST)
 
+	mux.Handle("POST /logout", authMiddleware.RequireAuth(http.HandlerFunc(authHandler.LogoutPOST)))
+
 	mux.Handle("GET /", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleGetTimeline)))
 	mux.Handle("POST /posts", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleCreatePost)))
 

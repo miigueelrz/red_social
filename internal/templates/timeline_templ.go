@@ -34,7 +34,7 @@ func Timeline(posts []models.Post) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"max-w-2xl mx-auto py-8 px-4\"><div class=\"bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8\"><form hx-post=\"/posts\" hx-target=\"#post-list\" hx-swap=\"afterbegin\" hx-on::after-request=\"this.reset()\" class=\"flex flex-col gap-4\"><textarea name=\"content\" placeholder=\"¿Qué está pasando?\" class=\"w-full resize-none border-0 focus:ring-0 p-2 text-gray-800 text-lg outline-none bg-transparent\" rows=\"3\" required></textarea><div class=\"flex justify-end items-center border-t border-gray-100 pt-4\"><button type=\"submit\" class=\"bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full transition-colors duration-200\">Publicar</button></div></form></div><div id=\"post-list\" class=\"flex flex-col gap-6\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"max-w-2xl mx-auto py-8 px-4\"><div class=\"flex justify-end mb-4\"><button hx-post=\"/logout\" class=\"bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-6 rounded-full transition-colors duration-200\">Cerrar Sesión</button></div><div class=\"bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8\"><form hx-post=\"/posts\" hx-target=\"#post-list\" hx-swap=\"afterbegin\" hx-on::after-request=\"this.reset()\" class=\"flex flex-col gap-4\"><textarea name=\"content\" placeholder=\"¿Qué está pasando?\" class=\"w-full resize-none border-0 focus:ring-0 p-2 text-gray-800 text-lg outline-none bg-transparent\" rows=\"3\" required></textarea><div class=\"flex justify-end items-center border-t border-gray-100 pt-4\"><button type=\"submit\" class=\"bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full transition-colors duration-200\">Publicar</button></div></form></div><div id=\"post-list\" class=\"flex flex-col gap-6\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -81,7 +81,7 @@ func PostItem(post models.Post) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(string(post.Author[0]))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/timeline.templ`, Line: 31, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/timeline.templ`, Line: 34, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -100,7 +100,7 @@ func PostItem(post models.Post) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(post.Author)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/timeline.templ`, Line: 37, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/timeline.templ`, Line: 40, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -113,7 +113,7 @@ func PostItem(post models.Post) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(post.CreatedAt.Format(time.RFC822))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/timeline.templ`, Line: 38, Col: 76}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/timeline.templ`, Line: 41, Col: 76}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -126,7 +126,7 @@ func PostItem(post models.Post) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(post.Content)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/timeline.templ`, Line: 41, Col: 89}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/timeline.templ`, Line: 44, Col: 89}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
