@@ -11,7 +11,9 @@ type Post = models.Post
 
 type PostRepository interface {
 	CreatePost(post *Post) error
-	GetRecentPosts() ([]Post, error)
+	GetRecentPosts(currentUserID int) ([]Post, error)
+	ToggleLike(userID, postID int) (bool, error)
+	GetLikesCount(postID int) (int, error)
 }
 
 type PostService struct {
@@ -43,11 +45,25 @@ func (s *PostService) CreatePost(userID int, content string) (*Post, error) {
 	return post, nil
 }
 
-func (s *PostService) GetTimeline() ([]Post, error) {
-	posts, err := s.postRepo.GetRecentPosts()
+func (s *PostService) GetTimeline(currentUserID int) ([]Post, error) {
+	posts, err := s.postRepo.GetRecentPosts(currentUserID)
 	if err != nil {
 		return nil, fmt.Errorf("error getting timeline: %w", err)
 	}
 
 	return posts, nil
+}
+
+func (s *PostService) ToggleLike(userID, postID int) (int, bool, error) {
+	userLiked, err := s.postRepo.ToggleLike(userID, postID)
+	if err != nil {
+		return 0, false, err
+	}
+	
+	likesCount, err := s.postRepo.GetLikesCount(postID)
+	if err != nil {
+		return 0, false, err
+	}
+	
+	return likesCount, userLiked, nil
 }

@@ -2,6 +2,7 @@ package templates
 
 import (
 	"red_social/internal/models"
+	"strconv"
 	"time"
 )
 
@@ -43,6 +44,40 @@ templ PostItem(post models.Post) {
 				<span class="text-sm text-gray-500">{ post.CreatedAt.Format(time.RFC822) }</span>
 			</div>
 		</div>
-		<div class="text-gray-800 whitespace-pre-wrap text-base leading-relaxed">{ post.Content }</div>
+		<div class="text-gray-800 whitespace-pre-wrap text-base leading-relaxed mb-4">{ post.Content }</div>
+		<div class="flex items-center gap-6 mt-4 pt-4 border-t border-gray-100">
+			@LikeButton(post.ID, post.LikesCount, post.UserLiked)
+		</div>
 	</div>
+}
+
+templ LikeButton(postID int, likesCount int, userLiked bool) {
+	<button 
+		hx-post={ "/posts/" + strconv.Itoa(postID) + "/like" }
+		hx-swap="outerHTML"
+		class={
+			"flex items-center gap-2 group transition-colors duration-200",
+			templ.KV("text-red-500 hover:text-red-600", userLiked),
+			templ.KV("text-gray-500 hover:text-red-500", !userLiked),
+		}
+	>
+		<div class={
+			"p-2 rounded-full transition-colors duration-200",
+			templ.KV("bg-red-50 group-hover:bg-red-100", userLiked),
+			templ.KV("group-hover:bg-red-50", !userLiked),
+		}>
+			if userLiked {
+				<svg class="w-5 h-5" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+			} else {
+				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+			}
+		</div>
+		<span class="font-medium text-sm">
+			if likesCount > 0 {
+				{ strconv.Itoa(likesCount) }
+			} else {
+				0
+			}
+		</span>
+	</button>
 }

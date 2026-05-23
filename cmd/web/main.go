@@ -50,6 +50,7 @@ func main() {
 
 	mux.Handle("GET /", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleGetTimeline)))
 	mux.Handle("POST /posts", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleCreatePost)))
+	mux.Handle("POST /posts/{id}/like", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleToggleLike)))
 
 	addr := ":" + cfg.Port
 	log.Printf("Servidor escuchando en %s", addr)
