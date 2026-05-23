@@ -11,7 +11,7 @@ services:
   # Servicio: base de datos PostgreSQL
   # -----------------------------------------------------------
   db:
-    image: postgres:latest
+    image: postgres:16
     container_name: red_social_db
     restart: unless-stopped
     environment:
