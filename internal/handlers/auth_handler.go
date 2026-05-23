@@ -45,6 +45,7 @@ func (h *AuthHandler) RegisterPOST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("HX-Redirect", "/login")
 	component := templates.FormSuccess("Registro exitoso")
 	component.Render(r.Context(), w)
 }
@@ -99,6 +100,7 @@ func (h *AuthHandler) LoginPOST(w http.ResponseWriter, r *http.Request) {
 		Expires:  session.ExpiresAt,
 	})
 
+	w.Header().Set("HX-Redirect", "/")
 	component := templates.FormSuccess("Inicio de sesión exitoso")
 	component.Render(r.Context(), w)
 }

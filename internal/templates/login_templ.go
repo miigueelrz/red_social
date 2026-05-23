@@ -29,7 +29,25 @@ func LoginForm() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<style>\n\t\t.login-container { max-width: 400px; margin: 2rem auto; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background-color: #ffffff; font-family: system-ui, -apple-system, sans-serif; }\n\t\t.form-group { margin-bottom: 1.5rem; }\n\t\t.form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #333; }\n\t\t.form-input { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1rem; }\n\t\t.submit-btn { width: 100%; padding: 0.75rem; background-color: #4F46E5; color: white; border: none; border-radius: 4px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }\n\t\t.submit-btn:hover { background-color: #4338CA; }\n\t\t.message-container { margin-bottom: 1rem; text-align: center; min-height: 24px; }\n\t</style><div class=\"login-container\"><h2 style=\"text-align: center; color: #111; margin-top: 0;\">Iniciar Sesión</h2><div id=\"login-message\" class=\"message-container\"></div><form hx-post=\"/login\" hx-target=\"#login-message\" hx-swap=\"innerHTML\"><div class=\"form-group\"><label for=\"email\" class=\"form-label\">Email</label> <input type=\"email\" id=\"email\" name=\"email\" class=\"form-input\" required></div><div class=\"form-group\"><label for=\"password\" class=\"form-label\">Password</label> <input type=\"password\" id=\"password\" name=\"password\" class=\"form-input\" required></div><button type=\"submit\" class=\"submit-btn\">Ingresar</button></form></div>")
+		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+			if !templ_7745c5c3_IsBuffer {
+				defer func() {
+					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err == nil {
+						templ_7745c5c3_Err = templ_7745c5c3_BufErr
+					}
+				}()
+			}
+			ctx = templ.InitializeContext(ctx)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<style>\n\t\t\t.login-container { max-width: 400px; margin: 2rem auto; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background-color: #ffffff; font-family: system-ui, -apple-system, sans-serif; }\n\t\t\t.form-group { margin-bottom: 1.5rem; }\n\t\t\t.form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #333; }\n\t\t\t.form-input { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1rem; }\n\t\t\t.submit-btn { width: 100%; padding: 0.75rem; background-color: #4F46E5; color: white; border: none; border-radius: 4px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }\n\t\t\t.submit-btn:hover { background-color: #4338CA; }\n\t\t\t.message-container { margin-bottom: 1rem; text-align: center; min-height: 24px; }\n\t\t</style> <div class=\"login-container\"><h2 style=\"text-align: center; color: #111; margin-top: 0;\">Iniciar Sesión</h2><div id=\"login-message\" class=\"message-container\"></div><form hx-post=\"/login\" hx-target=\"#login-message\" hx-swap=\"innerHTML\"><div class=\"form-group\"><label for=\"email\" class=\"form-label\">Email</label> <input type=\"email\" id=\"email\" name=\"email\" class=\"form-input\" required></div><div class=\"form-group\"><label for=\"password\" class=\"form-label\">Password</label> <input type=\"password\" id=\"password\" name=\"password\" class=\"form-input\" required></div><button type=\"submit\" class=\"submit-btn\">Ingresar</button></form></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			return nil
+		})
+		templ_7745c5c3_Err = Layout("Iniciar Sesión").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

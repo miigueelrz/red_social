@@ -30,7 +30,25 @@ func RegisterForm() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<style>\n        .register-container { max-width: 400px; margin: 2rem auto; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background-color: #ffffff; font-family: system-ui, -apple-system, sans-serif; }\n        .form-group { margin-bottom: 1.5rem; }\n        .form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #333; }\n        .form-input { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1rem; }\n        .submit-btn { width: 100%; padding: 0.75rem; background-color: #4F46E5; color: white; border: none; border-radius: 4px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }\n        .submit-btn:hover { background-color: #4338CA; }\n        .message-container { margin-bottom: 1rem; text-align: center; min-height: 24px; }\n    </style><div class=\"register-container\"><h2 style=\"text-align: center; color: #111; margin-top: 0;\">Crear Cuenta</h2><div id=\"register-message\" class=\"message-container\"></div><form hx-post=\"/register\" hx-target=\"#register-message\" hx-swap=\"innerHTML\"><div class=\"form-group\"><label for=\"username\" class=\"form-label\">Username</label> <input type=\"text\" id=\"username\" name=\"username\" class=\"form-input\" required></div><div class=\"form-group\"><label for=\"email\" class=\"form-label\">Email</label> <input type=\"email\" id=\"email\" name=\"email\" class=\"form-input\" required></div><div class=\"form-group\"><label for=\"password\" class=\"form-label\">Password</label> <input type=\"password\" id=\"password\" name=\"password\" class=\"form-input\" required></div><button type=\"submit\" class=\"submit-btn\">Registrarse</button></form></div>")
+		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+			if !templ_7745c5c3_IsBuffer {
+				defer func() {
+					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err == nil {
+						templ_7745c5c3_Err = templ_7745c5c3_BufErr
+					}
+				}()
+			}
+			ctx = templ.InitializeContext(ctx)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<style>\n            .register-container { max-width: 400px; margin: 2rem auto; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background-color: #ffffff; font-family: system-ui, -apple-system, sans-serif; }\n            .form-group { margin-bottom: 1.5rem; }\n            .form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #333; }\n            .form-input { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1rem; }\n            .submit-btn { width: 100%; padding: 0.75rem; background-color: #4F46E5; color: white; border: none; border-radius: 4px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }\n            .submit-btn:hover { background-color: #4338CA; }\n            .message-container { margin-bottom: 1rem; text-align: center; min-height: 24px; }\n        </style> <div class=\"register-container\"><h2 style=\"text-align: center; color: #111; margin-top: 0;\">Crear Cuenta</h2><div id=\"register-message\" class=\"message-container\"></div><form hx-post=\"/register\" hx-target=\"#register-message\" hx-swap=\"innerHTML\"><div class=\"form-group\"><label for=\"username\" class=\"form-label\">Username</label> <input type=\"text\" id=\"username\" name=\"username\" class=\"form-input\" required></div><div class=\"form-group\"><label for=\"email\" class=\"form-label\">Email</label> <input type=\"email\" id=\"email\" name=\"email\" class=\"form-input\" required></div><div class=\"form-group\"><label for=\"password\" class=\"form-label\">Password</label> <input type=\"password\" id=\"password\" name=\"password\" class=\"form-input\" required></div><button type=\"submit\" class=\"submit-btn\">Registrarse</button></form></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			return nil
+		})
+		templ_7745c5c3_Err = Layout("Registro").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -54,21 +72,21 @@ func FormError(message string) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var2 == nil {
-			templ_7745c5c3_Var2 = templ.NopComponent
+		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var3 == nil {
+			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div style=\"color: #DC2626; padding: 0.5rem; background-color: #FEE2E2; border-radius: 4px; border: 1px solid #F87171; font-size: 0.875rem;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(message)
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(message)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/register.templ`, Line: 36, Col: 154}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/register.templ`, Line: 38, Col: 154}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -96,21 +114,21 @@ func FormSuccess(message string) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var4 == nil {
-			templ_7745c5c3_Var4 = templ.NopComponent
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div style=\"color: #059669; padding: 0.5rem; background-color: #D1FAE5; border-radius: 4px; border: 1px solid #34D399; font-size: 0.875rem;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(message)
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(message)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/register.templ`, Line: 40, Col: 154}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/register.templ`, Line: 42, Col: 154}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

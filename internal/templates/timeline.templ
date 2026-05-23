@@ -6,24 +6,26 @@ import (
 )
 
 templ Timeline(posts []models.Post) {
-	<div class="max-w-2xl mx-auto py-8 px-4">
-		<div class="flex justify-end mb-4">
-			<button hx-post="/logout" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-6 rounded-full transition-colors duration-200">Cerrar Sesión</button>
+	@Layout("Muro") {
+		<div class="max-w-2xl mx-auto py-8 px-4">
+			<div class="flex justify-end mb-4">
+				<button hx-post="/logout" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-6 rounded-full transition-colors duration-200">Cerrar Sesión</button>
+			</div>
+			<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+				<form hx-post="/posts" hx-target="#post-list" hx-swap="afterbegin" hx-on::after-request="this.reset()" class="flex flex-col gap-4">
+					<textarea name="content" placeholder="¿Qué está pasando?" class="w-full resize-none border-0 focus:ring-0 p-2 text-gray-800 text-lg outline-none bg-transparent" rows="3" required></textarea>
+					<div class="flex justify-end items-center border-t border-gray-100 pt-4">
+						<button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full transition-colors duration-200">Publicar</button>
+					</div>
+				</form>
+			</div>
+			<div id="post-list" class="flex flex-col gap-6">
+				for _, post := range posts {
+					@PostItem(post)
+				}
+			</div>
 		</div>
-		<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-			<form hx-post="/posts" hx-target="#post-list" hx-swap="afterbegin" hx-on::after-request="this.reset()" class="flex flex-col gap-4">
-				<textarea name="content" placeholder="¿Qué está pasando?" class="w-full resize-none border-0 focus:ring-0 p-2 text-gray-800 text-lg outline-none bg-transparent" rows="3" required></textarea>
-				<div class="flex justify-end items-center border-t border-gray-100 pt-4">
-					<button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full transition-colors duration-200">Publicar</button>
-				</div>
-			</form>
-		</div>
-		<div id="post-list" class="flex flex-col gap-6">
-			for _, post := range posts {
-				@PostItem(post)
-			}
-		</div>
-	</div>
+	}
 }
 
 templ PostItem(post models.Post) {
