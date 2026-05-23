@@ -13,13 +13,15 @@ import (
 type contextKey string
 
 const UserIDKey contextKey = "user_id"
+const UsernameKey contextKey = "username"
 
 type AuthMiddleware struct {
 	sessionRepo *repositories.SessionRepository
+	userRepo    *repositories.UserRepository
 }
 
-func NewAuthMiddleware(sessionRepo *repositories.SessionRepository) *AuthMiddleware {
-	return &AuthMiddleware{sessionRepo: sessionRepo}
+func NewAuthMiddleware(sessionRepo *repositories.SessionRepository, userRepo *repositories.UserRepository) *AuthMiddleware {
+	return &AuthMiddleware{sessionRepo: sessionRepo, userRepo: userRepo}
 }
 
 func (m *AuthMiddleware) RequireAuth(next http.Handler) http.Handler {
@@ -43,7 +45,14 @@ func (m *AuthMiddleware) RequireAuth(next http.Handler) http.Handler {
 			return
 		}
 
+		user, err := m.userRepo.FindByID(session.UserID)
+		if err != nil || user == nil {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+
 		ctx := context.WithValue(r.Context(), UserIDKey, session.UserID)
+		ctx = context.WithValue(ctx, UsernameKey, user.Username)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

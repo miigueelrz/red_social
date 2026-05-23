@@ -24,7 +24,7 @@ func NewPostService(postRepo PostRepository) *PostService {
 	return &PostService{postRepo: postRepo}
 }
 
-func (s *PostService) CreatePost(userID int, content string) (*Post, error) {
+func (s *PostService) CreatePost(userID int, content, imageURL string) (*Post, error) {
 	if content == "" {
 		return nil, errors.New("content is required")
 	}
@@ -34,8 +34,9 @@ func (s *PostService) CreatePost(userID int, content string) (*Post, error) {
 	}
 
 	post := &Post{
-		UserID:  userID,
-		Content: content,
+		UserID:   userID,
+		Content:  content,
+		ImageURL: imageURL,
 	}
 
 	if err := s.postRepo.CreatePost(post); err != nil {

@@ -32,7 +32,7 @@ func main() {
 
 	authHandler := handlers.NewAuthHandler(authService, sessionRepo)
 	postHandler := handlers.NewPostHandler(postService)
-	authMiddleware := middleware.NewAuthMiddleware(sessionRepo)
+	authMiddleware := middleware.NewAuthMiddleware(sessionRepo, userRepo)
 
 	mux := http.NewServeMux()
 
@@ -51,6 +51,8 @@ func main() {
 	mux.Handle("GET /", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleGetTimeline)))
 	mux.Handle("POST /posts", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleCreatePost)))
 	mux.Handle("POST /posts/{id}/like", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleToggleLike)))
+
+	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
 	addr := ":" + cfg.Port
 	log.Printf("Servidor escuchando en %s", addr)

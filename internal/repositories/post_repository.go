@@ -16,8 +16,8 @@ func NewPostRepository(db *sql.DB) *PostRepository {
 }
 
 func (r *PostRepository) CreatePost(post *models.Post) error {
-	query := `INSERT INTO posts (user_id, content)
-		VALUES ($1, $2)
+	query := `INSERT INTO posts (user_id, content, image_url)
+		VALUES ($1, $2, $3)
 		RETURNING id, created_at`
 
 	stmt, err := r.db.Prepare(query)
@@ -26,7 +26,7 @@ func (r *PostRepository) CreatePost(post *models.Post) error {
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow(post.UserID, post.Content).Scan(&post.ID, &post.CreatedAt)
+	err = stmt.QueryRow(post.UserID, post.Content, post.ImageURL).Scan(&post.ID, &post.CreatedAt)
 	if err != nil {
 		return fmt.Errorf("error creating post: %w", err)
 	}
@@ -35,7 +35,7 @@ func (r *PostRepository) CreatePost(post *models.Post) error {
 }
 
 func (r *PostRepository) GetRecentPosts(currentUserID int) ([]models.Post, error) {
-	query := `SELECT p.id, p.user_id, p.content, p.created_at, u.username AS author,
+	query := `SELECT p.id, p.user_id, u.username, p.content, p.created_at, p.image_url,
 		(SELECT COUNT(*) FROM likes WHERE post_id = p.id) AS likes_count,
 		EXISTS(SELECT 1 FROM likes WHERE post_id = p.id AND user_id = $1) AS user_liked
 		FROM posts p
@@ -57,7 +57,7 @@ func (r *PostRepository) GetRecentPosts(currentUserID int) ([]models.Post, error
 	var posts []models.Post
 	for rows.Next() {
 		var post models.Post
-		err := rows.Scan(&post.ID, &post.UserID, &post.Content, &post.CreatedAt, &post.Author, &post.LikesCount, &post.UserLiked)
+		err := rows.Scan(&post.ID, &post.UserID, &post.Author, &post.Content, &post.CreatedAt, &post.ImageURL, &post.LikesCount, &post.UserLiked)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning post row: %w", err)
 		}

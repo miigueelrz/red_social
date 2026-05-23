@@ -8,7 +8,7 @@ package templates
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-func Layout(title string) templ.Component {
+func Layout(title string, username string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -36,13 +36,62 @@ func Layout(title string) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layout.templ`, Line: 9, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layout.templ`, Line: 9, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - Red Social</title><script src=\"https://unpkg.com/htmx.org@1.9.12\"></script><script src=\"https://cdn.tailwindcss.com\"></script></head><body class=\"bg-gray-50\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - Red Social</title><script src=\"https://unpkg.com/htmx.org@1.9.12\"></script><script src=\"https://cdn.tailwindcss.com\"></script></head><body class=\"bg-white text-black font-sans antialiased\"><div class=\"grid grid-cols-4 max-w-7xl mx-auto min-h-screen\"><!-- Left Sidebar (1/4) --><header class=\"col-span-1 h-screen sticky top-0 flex flex-col justify-between py-3 px-2\"><div><!-- Logo --><div class=\"mb-4 px-3\"><a href=\"/\" class=\"inline-flex items-center justify-center w-12 h-12 rounded-full hover:bg-blue-50 transition\"><svg class=\"w-8 h-8 text-blue-500\" fill=\"currentColor\" viewBox=\"0 0 24 24\"><path d=\"M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z\"></path></svg></a></div><!-- Navigation --><nav class=\"space-y-1\"><a href=\"/\" class=\"flex items-center gap-4 text-xl text-black hover:bg-gray-200 px-4 py-3 rounded-full transition font-bold\"><svg class=\"w-7 h-7\" fill=\"currentColor\" viewBox=\"0 0 24 24\"><path d=\"M21.591 7.146L12.52 1.157c-.316-.21-.724-.21-1.04 0l-9.071 5.99c-.26.173-.409.456-.409.757v13.183c0 .502.418.913.929.913h5.8a.93.93 0 00.929-.913v-7.075h3.684v7.075c0 .502.418.913.929.913h5.8a.93.93 0 00.929-.913V7.903c0-.3-.15-.584-.409-.757z\"></path></svg> <span class=\"hidden lg:block\">Inicio</span></a> <a href=\"/profile\" class=\"flex items-center gap-4 text-xl text-gray-800 hover:bg-gray-200 px-4 py-3 rounded-full transition font-medium\"><svg class=\"w-7 h-7\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z\"></path></svg> <span class=\"hidden lg:block\">Perfil</span></a></nav><!-- Post Button --><div class=\"mt-4 pr-4\"><button class=\"w-full bg-blue-500 hover:bg-blue-600 text-white font-bold text-lg py-3 rounded-full transition shadow-lg\"><span class=\"hidden lg:block\">Postear</span> <svg class=\"w-6 h-6 lg:hidden mx-auto\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M12 4v16m8-8H4\"></path></svg></button></div></div><!-- User Profile -->")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if username != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"mb-4 px-2\"><a href=\"/profile\" class=\"flex items-center gap-3 hover:bg-gray-200 p-3 rounded-full transition cursor-pointer\"><div class=\"w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-lg uppercase\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 string
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(string(username[0]))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layout.templ`, Line: 51, Col: 29}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div class=\"hidden lg:block overflow-hidden\"><p class=\"font-bold text-sm text-gray-900 truncate\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var4 string
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(username)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layout.templ`, Line: 54, Col: 70}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</p><p class=\"text-gray-500 text-sm truncate\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs("@" + username)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layout.templ`, Line: 55, Col: 66}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</p></div><div class=\"hidden lg:block ml-auto text-gray-500\"><svg class=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z\"></path></svg></div></a></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</header><!-- Main Content (2/4) --><main class=\"col-span-2 min-h-screen border-l border-r border-gray-200\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -50,7 +99,7 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</main><!-- Right Sidebar (1/4) --><aside class=\"col-span-1 h-screen sticky top-0 py-4 px-6\"><div class=\"bg-gray-50 rounded-2xl p-4\"><h2 class=\"font-bold text-xl mb-4\">Qué está pasando</h2><div class=\"space-y-4\"><div class=\"cursor-pointer hover:bg-gray-100 p-3 -mx-3 rounded-lg transition\"><p class=\"font-bold text-gray-900\">#Golang</p><p class=\"text-sm text-gray-500\">12.5K posts</p></div><div class=\"cursor-pointer hover:bg-gray-100 p-3 -mx-3 rounded-lg transition\"><p class=\"font-bold text-gray-900\">#DesarrolloWeb</p><p class=\"text-sm text-gray-500\">8.2K posts</p></div><div class=\"cursor-pointer hover:bg-gray-100 p-3 -mx-3 rounded-lg transition\"><p class=\"font-bold text-gray-900\">#HTMX</p><p class=\"text-sm text-gray-500\">3.7K posts</p></div><div class=\"cursor-pointer hover:bg-gray-100 p-3 -mx-3 rounded-lg transition\"><p class=\"font-bold text-gray-900\">#TailwindCSS</p><p class=\"text-sm text-gray-500\">6.1K posts</p></div></div></div></aside></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
