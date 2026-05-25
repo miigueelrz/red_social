@@ -17,8 +17,8 @@ templ Layout(title string, username string) {
 				<div>
 					<!-- Logo -->
 					<div class="mb-4 px-3">
-						<a href="/" class="inline-flex items-center justify-center w-12 h-12 rounded-full hover:bg-blue-50 transition">
-							<svg class="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
+						<a href="/" class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-500 text-white font-bold text-xl hover:bg-blue-600 transition">
+							M
 						</a>
 					</div>
 
@@ -92,6 +92,24 @@ templ Layout(title string, username string) {
 				</div>
 			</aside>
 		</div>
+	</body>
+	</html>
+}
+
+templ AuthLayout(title string) {
+	<!DOCTYPE html>
+	<html lang="es">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title>{ title } - Red Social</title>
+		<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+		<script src="https://cdn.tailwindcss.com"></script>
+	</head>
+	<body class="min-h-screen bg-gray-50 text-gray-900 font-sans antialiased">
+		<main class="min-h-screen flex items-center justify-center px-4 py-10">
+			{ children... }
+		</main>
 	</body>
 	</html>
 }

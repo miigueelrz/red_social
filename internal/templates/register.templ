@@ -2,7 +2,7 @@ package templates
 
 // RegisterForm renderiza el formulario de registro con estilos integrados y atributos HTMX.
 templ RegisterForm() {
-    @Layout("Registro", "") {
+    @AuthLayout("Registro") {
         <style>
             .register-container { max-width: 400px; margin: 2rem auto; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background-color: #ffffff; font-family: system-ui, -apple-system, sans-serif; }
             .form-group { margin-bottom: 1.5rem; }

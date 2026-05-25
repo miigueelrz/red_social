@@ -16,8 +16,8 @@ func NewPostRepository(db *sql.DB) *PostRepository {
 }
 
 func (r *PostRepository) CreatePost(post *models.Post) error {
-	query := `INSERT INTO posts (user_id, content, image_url)
-		VALUES ($1, $2, $3)
+	query := `INSERT INTO posts (user_id, content, image_url, parent_id)
+		VALUES ($1, $2, $3, $4)
 		RETURNING id, created_at`
 
 	stmt, err := r.db.Prepare(query)
@@ -26,7 +26,7 @@ func (r *PostRepository) CreatePost(post *models.Post) error {
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow(post.UserID, post.Content, post.ImageURL).Scan(&post.ID, &post.CreatedAt)
+	err = stmt.QueryRow(post.UserID, post.Content, post.ImageURL, post.ParentID).Scan(&post.ID, &post.CreatedAt)
 	if err != nil {
 		return fmt.Errorf("error creating post: %w", err)
 	}
@@ -35,11 +35,13 @@ func (r *PostRepository) CreatePost(post *models.Post) error {
 }
 
 func (r *PostRepository) GetRecentPosts(currentUserID int) ([]models.Post, error) {
-	query := `SELECT p.id, p.user_id, u.username, p.content, p.created_at, p.image_url,
+	query := `SELECT p.id, p.user_id, u.username, p.content, p.created_at, p.image_url, p.parent_id,
 		(SELECT COUNT(*) FROM likes WHERE post_id = p.id) AS likes_count,
+		(SELECT COUNT(*) FROM posts WHERE parent_id = p.id) AS replies_count,
 		EXISTS(SELECT 1 FROM likes WHERE post_id = p.id AND user_id = $1) AS user_liked
 		FROM posts p
 		JOIN users u ON p.user_id = u.id
+		WHERE p.parent_id IS NULL
 		ORDER BY p.created_at DESC`
 
 	stmt, err := r.db.Prepare(query)
@@ -57,7 +59,7 @@ func (r *PostRepository) GetRecentPosts(currentUserID int) ([]models.Post, error
 	var posts []models.Post
 	for rows.Next() {
 		var post models.Post
-		err := rows.Scan(&post.ID, &post.UserID, &post.Author, &post.Content, &post.CreatedAt, &post.ImageURL, &post.LikesCount, &post.UserLiked)
+		err := rows.Scan(&post.ID, &post.UserID, &post.Author, &post.Content, &post.CreatedAt, &post.ImageURL, &post.ParentID, &post.LikesCount, &post.RepliesCount, &post.UserLiked)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning post row: %w", err)
 		}
@@ -71,24 +73,77 @@ func (r *PostRepository) GetRecentPosts(currentUserID int) ([]models.Post, error
 	return posts, nil
 }
 
+func (r *PostRepository) GetReplies(postID, currentUserID int) ([]models.Post, error) {
+	query := `SELECT p.id, p.user_id, u.username, p.content, p.created_at, p.image_url, p.parent_id,
+		(SELECT COUNT(*) FROM likes WHERE post_id = p.id) AS likes_count,
+		(SELECT COUNT(*) FROM posts WHERE parent_id = p.id) AS replies_count,
+		EXISTS(SELECT 1 FROM likes WHERE post_id = p.id AND user_id = $2) AS user_liked
+		FROM posts p
+		JOIN users u ON p.user_id = u.id
+		WHERE p.parent_id = $1
+		ORDER BY p.created_at ASC`
+
+	stmt, err := r.db.Prepare(query)
+	if err != nil {
+		return nil, fmt.Errorf("error preparing get replies statement: %w", err)
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(postID, currentUserID)
+	if err != nil {
+		return nil, fmt.Errorf("error querying replies: %w", err)
+	}
+	defer rows.Close()
+
+	var posts []models.Post
+	for rows.Next() {
+		var post models.Post
+		err := rows.Scan(&post.ID, &post.UserID, &post.Author, &post.Content, &post.CreatedAt, &post.ImageURL, &post.ParentID, &post.LikesCount, &post.RepliesCount, &post.UserLiked)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning reply row: %w", err)
+		}
+		posts = append(posts, post)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating reply rows: %w", err)
+	}
+
+	return posts, nil
+}
+
 func (r *PostRepository) ToggleLike(userID, postID int) (bool, error) {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return false, fmt.Errorf("error starting like transaction: %w", err)
+	}
+	defer tx.Rollback()
+
 	var exists bool
-	err := r.db.QueryRow("SELECT EXISTS(SELECT 1 FROM likes WHERE user_id = $1 AND post_id = $2)", userID, postID).Scan(&exists)
+	err = tx.QueryRow("SELECT EXISTS(SELECT 1 FROM likes WHERE user_id = $1 AND post_id = $2)", userID, postID).Scan(&exists)
 	if err != nil {
 		return false, fmt.Errorf("error checking if like exists: %w", err)
 	}
 
 	if exists {
-		_, err = r.db.Exec("DELETE FROM likes WHERE user_id = $1 AND post_id = $2", userID, postID)
+		_, err = tx.Exec("DELETE FROM likes WHERE user_id = $1 AND post_id = $2", userID, postID)
 		if err != nil {
 			return false, fmt.Errorf("error deleting like: %w", err)
+		}
+
+		if err := tx.Commit(); err != nil {
+			return false, fmt.Errorf("error committing unlike: %w", err)
 		}
 		return false, nil
 	}
 
-	_, err = r.db.Exec("INSERT INTO likes (user_id, post_id) VALUES ($1, $2)", userID, postID)
+	_, err = tx.Exec("INSERT INTO likes (user_id, post_id) VALUES ($1, $2)", userID, postID)
 	if err != nil {
 		return false, fmt.Errorf("error inserting like: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return false, fmt.Errorf("error committing like: %w", err)
 	}
 	return true, nil
 }

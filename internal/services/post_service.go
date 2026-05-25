@@ -12,6 +12,7 @@ type Post = models.Post
 type PostRepository interface {
 	CreatePost(post *Post) error
 	GetRecentPosts(currentUserID int) ([]Post, error)
+	GetReplies(postID, currentUserID int) ([]Post, error)
 	ToggleLike(userID, postID int) (bool, error)
 	GetLikesCount(postID int) (int, error)
 }
@@ -24,7 +25,7 @@ func NewPostService(postRepo PostRepository) *PostService {
 	return &PostService{postRepo: postRepo}
 }
 
-func (s *PostService) CreatePost(userID int, content, imageURL string) (*Post, error) {
+func (s *PostService) CreatePost(userID int, content, imageURL string, parentID *int) (*Post, error) {
 	if content == "" {
 		return nil, errors.New("content is required")
 	}
@@ -37,6 +38,7 @@ func (s *PostService) CreatePost(userID int, content, imageURL string) (*Post, e
 		UserID:   userID,
 		Content:  content,
 		ImageURL: imageURL,
+		ParentID: parentID,
 	}
 
 	if err := s.postRepo.CreatePost(post); err != nil {
@@ -52,7 +54,32 @@ func (s *PostService) GetTimeline(currentUserID int) ([]Post, error) {
 		return nil, fmt.Errorf("error getting timeline: %w", err)
 	}
 
+	for i := range posts {
+		replies, err := s.getRepliesTree(posts[i].ID, currentUserID)
+		if err != nil {
+			return nil, fmt.Errorf("error getting replies for post %d: %w", posts[i].ID, err)
+		}
+		posts[i].Replies = replies
+	}
+
 	return posts, nil
+}
+
+func (s *PostService) getRepliesTree(postID, currentUserID int) ([]Post, error) {
+	replies, err := s.postRepo.GetReplies(postID, currentUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range replies {
+		childReplies, err := s.getRepliesTree(replies[i].ID, currentUserID)
+		if err != nil {
+			return nil, err
+		}
+		replies[i].Replies = childReplies
+	}
+
+	return replies, nil
 }
 
 func (s *PostService) ToggleLike(userID, postID int) (int, bool, error) {
@@ -60,11 +87,11 @@ func (s *PostService) ToggleLike(userID, postID int) (int, bool, error) {
 	if err != nil {
 		return 0, false, err
 	}
-	
+
 	likesCount, err := s.postRepo.GetLikesCount(postID)
 	if err != nil {
 		return 0, false, err
 	}
-	
+
 	return likesCount, userLiked, nil
 }
