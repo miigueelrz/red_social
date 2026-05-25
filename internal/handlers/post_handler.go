@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"io"
+	"log"
 	"mime"
 	"net/http"
 	"os"
@@ -15,6 +16,13 @@ import (
 	"red_social/internal/services"
 	"red_social/internal/templates"
 )
+
+func writeHTMXError(w http.ResponseWriter, msg string, status int) {
+	log.Printf("HTMX error (status=%d): %s", status, msg)
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(status)
+	w.Write([]byte(msg))
+}
 
 type PostHandler struct {
 	postService *services.PostService
@@ -52,12 +60,12 @@ func (h *PostHandler) HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 	isMultipart := mediaType == "multipart/form-data"
 	if isMultipart {
 		if err := r.ParseMultipartForm(10 << 20); err != nil {
-			http.Error(w, "no se pudo procesar el formulario o la imagen supera los 20MB", http.StatusBadRequest)
+			writeHTMXError(w, "No se pudo procesar el formulario o la imagen supera los 20 MB.", http.StatusBadRequest)
 			return
 		}
 	} else {
 		if err := r.ParseForm(); err != nil {
-			http.Error(w, "error parsing form", http.StatusBadRequest)
+			writeHTMXError(w, "Error al procesar el formulario.", http.StatusBadRequest)
 			return
 		}
 	}
@@ -66,7 +74,7 @@ func (h *PostHandler) HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	userID, ok := r.Context().Value(middleware.UserIDKey).(int64)
 	if !ok {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		writeHTMXError(w, "No autorizado.", http.StatusUnauthorized)
 		return
 	}
 
@@ -75,7 +83,7 @@ func (h *PostHandler) HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 	if parentIDStr != "" {
 		pid, err := strconv.Atoi(parentIDStr)
 		if err != nil {
-			http.Error(w, "invalid parent id", http.StatusBadRequest)
+			writeHTMXError(w, "ID de publicación inválido.", http.StatusBadRequest)
 			return
 		}
 		parentID = &pid
@@ -87,41 +95,47 @@ func (h *PostHandler) HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 		if err == nil {
 			defer file.Close()
 
-			if header.Filename == "" {
-				http.Error(w, "invalid image filename", http.StatusBadRequest)
+			allowedExts := map[string]bool{
+				".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".webp": true,
+			}
+			ext := filepath.Ext(header.Filename)
+			if !allowedExts[ext] {
+				writeHTMXError(w, "Formato de imagen no soportado. Usa JPG, PNG, GIF o WebP.", http.StatusBadRequest)
 				return
 			}
 
 			uploadDir := "./static/uploads"
 			if err := os.MkdirAll(uploadDir, 0755); err != nil {
-				http.Error(w, "error creating upload directory", http.StatusInternalServerError)
+				log.Printf("ERROR creating upload dir %s: %v", uploadDir, err)
+				writeHTMXError(w, "Error interno al preparar el directorio de imágenes. Intenta de nuevo.", http.StatusInternalServerError)
 				return
 			}
 
-			ext := filepath.Ext(header.Filename)
 			filename := fmt.Sprintf("%d%s", time.Now().UnixNano(), ext)
 			dst, err := os.Create(filepath.Join(uploadDir, filename))
 			if err != nil {
-				http.Error(w, "error saving file", http.StatusInternalServerError)
+				log.Printf("ERROR creating file %s: %v", filename, err)
+				writeHTMXError(w, "Error interno al guardar la imagen. Intenta de nuevo.", http.StatusInternalServerError)
 				return
 			}
 			defer dst.Close()
 
 			if _, err := io.Copy(dst, file); err != nil {
-				http.Error(w, "error saving file", http.StatusInternalServerError)
+				log.Printf("ERROR copying file %s: %v", filename, err)
+				writeHTMXError(w, "Error interno al guardar la imagen. Intenta de nuevo.", http.StatusInternalServerError)
 				return
 			}
 
 			imageURL = "/static/uploads/" + filename
 		} else if err != http.ErrMissingFile {
-			http.Error(w, "error reading uploaded file", http.StatusBadRequest)
+			writeHTMXError(w, "Error al leer el archivo subido.", http.StatusBadRequest)
 			return
 		}
 	}
 
 	post, err := h.postService.CreatePost(int(userID), content, imageURL, parentID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		writeHTMXError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 

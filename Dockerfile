@@ -43,6 +43,10 @@ COPY --from=builder /app/bin/server .
 # Copiar recursos estaticos si existen
 COPY --from=builder /app/static ./static
 
+# Crear directorio de uploads con permisos para appuser
+# (appuser no puede crear subdirectorios en ./static porque la carpeta es de root)
+RUN mkdir -p ./static/uploads && chown -R appuser:appgroup ./static/uploads
+
 # Usar el usuario sin privilegios
 USER appuser
 

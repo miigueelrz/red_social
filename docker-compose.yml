@@ -52,9 +52,10 @@ services:
       JWT_SECRET:   ${JWT_SECRET:-cambiar_esto_por_un_secreto_seguro}
     ports:
       - "${PORT:-8080}:8080"
-    # En desarrollo puedes montar el código fuente si usas Air para hot-reload
-    # volumes:
-    #   - .:/app
+    # Montar directorio de uploads para persistencia de imágenes
+    # y para que el contenedor pueda escribir en él (appuser necesita escritura)
+    volumes:
+      - ./static/uploads:/app/static/uploads
 
 # =============================================================
 # Volúmenes nombrados
