@@ -12,7 +12,7 @@ templ Layout(title string, user *models.User) {
 	<head>
 		<meta charset="UTF-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<title>{ title } - Red Social</title>
+		<title>{ title } - NebrijaHub</title>
 		<script src="https://unpkg.com/htmx.org@1.9.12"></script>
 		<script src="https://cdn.tailwindcss.com"></script>
 	</head>
@@ -23,7 +23,7 @@ templ Layout(title string, user *models.User) {
 				<div>
 					<!-- Logo / Avatar -->
 					<div class="mb-4 px-3">
-						<a href="/" class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 text-white font-bold text-xl hover:opacity-90 transition overflow-hidden">
+						<a href="/" class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-tr from-red-600 to-red-800 text-white font-bold text-xl hover:opacity-90 transition overflow-hidden">
 							if user != nil && user.AvatarURL != "" {
 								<img src={ templ.URL(user.AvatarURL + "?v=" + fmt.Sprint(time.Now().Unix())) } alt="Avatar" class="w-12 h-12 rounded-full object-cover"/>
 							} else {
@@ -46,7 +46,7 @@ templ Layout(title string, user *models.User) {
 
 					<!-- Post Button -->
 					<div class="mt-4 pr-4">
-						<button class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold text-lg py-3 rounded-full transition shadow-lg">
+						<button class="w-full bg-red-600 hover:bg-red-700 text-white font-bold text-lg py-3 rounded-full transition shadow-lg">
 							<span class="hidden lg:block">Postear</span>
 							<svg class="w-6 h-6 lg:hidden mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
 						</button>
@@ -58,7 +58,7 @@ templ Layout(title string, user *models.User) {
 					<div class="relative mb-4 px-2">
 						<div class="flex items-center gap-3">
 							<a href="/profile" class="flex items-center gap-3 hover:bg-gray-200 p-3 rounded-full transition flex-1 min-w-0">
-								<div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg uppercase shrink-0">
+								<div class="w-10 h-10 rounded-full bg-gradient-to-tr from-red-600 to-red-800 flex items-center justify-center text-white font-bold text-lg uppercase shrink-0">
 									if user.AvatarURL != "" {
 										<img src={ templ.URL(user.AvatarURL + "?v=" + fmt.Sprint(time.Now().Unix())) } alt="Avatar" class="w-10 h-10 rounded-full object-cover"/>
 									} else {
@@ -143,7 +143,7 @@ templ AuthLayout(title string) {
 	<head>
 		<meta charset="UTF-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<title>{ title } - Red Social</title>
+		<title>{ title } - NebrijaHub</title>
 		<script src="https://unpkg.com/htmx.org@1.9.12"></script>
 		<script src="https://cdn.tailwindcss.com"></script>
 	</head>

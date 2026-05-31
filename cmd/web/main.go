@@ -50,7 +50,7 @@ func main() {
 
 	mux.Handle("POST /logout", authMiddleware.RequireAuth(http.HandlerFunc(authHandler.LogoutPOST)))
 
-	mux.Handle("GET /", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleGetTimeline)))
+	mux.Handle("GET /", authMiddleware.OptionalAuth(http.HandlerFunc(postHandler.HandleGetTimeline)))
 	mux.Handle("POST /posts", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleCreatePost)))
 	mux.Handle("POST /posts/{id}/like", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleToggleLike)))
 

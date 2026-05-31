@@ -38,7 +38,8 @@ const maxPostUploadSize = 20 << 20
 func (h *PostHandler) HandleGetTimeline(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(middleware.UserIDKey).(int64)
 	if !ok {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		component := templates.Landing()
+		component.Render(r.Context(), w)
 		return
 	}
 

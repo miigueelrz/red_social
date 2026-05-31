@@ -27,34 +27,47 @@ func NewAuthMiddleware(sessionRepo *repositories.SessionRepository, userRepo *re
 
 func (m *AuthMiddleware) RequireAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("session_token")
-		if err != nil {
+		ctx := m.resolveSession(r)
+		if ctx == nil {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
-
-		hash := sha256.Sum256([]byte(cookie.Value))
-		tokenHash := hex.EncodeToString(hash[:])
-
-		session, err := m.sessionRepo.GetSessionByTokenHash(tokenHash)
-		if err != nil {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
-		if session == nil || time.Now().After(session.ExpiresAt) {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
-
-		user, err := m.userRepo.FindByID(session.UserID)
-		if err != nil || user == nil {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
-
-		ctx := context.WithValue(r.Context(), UserIDKey, session.UserID)
-		ctx = context.WithValue(ctx, UsernameKey, user.Username)
-		ctx = context.WithValue(ctx, UserKey, user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func (m *AuthMiddleware) OptionalAuth(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := m.resolveSession(r)
+		if ctx != nil {
+			next.ServeHTTP(w, r.WithContext(ctx))
+		} else {
+			next.ServeHTTP(w, r)
+		}
+	})
+}
+
+func (m *AuthMiddleware) resolveSession(r *http.Request) context.Context {
+	cookie, err := r.Cookie("session_token")
+	if err != nil {
+		return nil
+	}
+
+	hash := sha256.Sum256([]byte(cookie.Value))
+	tokenHash := hex.EncodeToString(hash[:])
+
+	session, err := m.sessionRepo.GetSessionByTokenHash(tokenHash)
+	if err != nil || session == nil || time.Now().After(session.ExpiresAt) {
+		return nil
+	}
+
+	user, err := m.userRepo.FindByID(session.UserID)
+	if err != nil || user == nil {
+		return nil
+	}
+
+	ctx := context.WithValue(r.Context(), UserIDKey, session.UserID)
+	ctx = context.WithValue(ctx, UsernameKey, user.Username)
+	ctx = context.WithValue(ctx, UserKey, user)
+	return ctx
 }
