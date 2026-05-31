@@ -41,7 +41,20 @@ func Landing() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"max-w-md mx-auto text-center\" hx-boost=\"true\"><div class=\"mb-10\"><div class=\"inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-tr from-red-600 to-red-800 text-white font-bold text-3xl shadow-lg mb-6\">N</div><h1 class=\"text-4xl font-extrabold tracking-tight text-gray-950 mb-3\">Bienvenido a NebrijaHub</h1><p class=\"text-lg text-gray-500\">Comparte lo que está pasando, conecta con personas y descubre tendencias.</p></div><div class=\"space-y-4\"><a href=\"/login\" class=\"block w-full rounded-full bg-red-700 px-6 py-3.5 text-lg font-bold text-white shadow-sm transition-colors hover:bg-red-800\">Iniciar sesión</a> <a href=\"/register\" class=\"block w-full rounded-full border-2 border-gray-200 bg-white px-6 py-3.5 text-lg font-bold text-gray-900 transition-colors hover:bg-gray-50\">Registrarse</a></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"max-w-md mx-auto text-center\" hx-boost=\"true\"><div class=\"mb-10\"><div class=\"inline-flex items-center justify-center w-20 h-20 rounded-full shadow-lg mb-6 overflow-hidden\"><img src=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 string
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(templ.URL("/static/uploads/logo.jpeg"))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/landing.templ`, Line: 8, Col: 54}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" alt=\"Logo\" class=\"w-full h-full object-cover\"></div><h1 class=\"text-4xl font-extrabold tracking-tight text-gray-950 mb-3\">Bienvenido a NebrijaHub</h1><p class=\"text-lg text-gray-500\">Comparte lo que está pasando, conecta con personas y descubre tendencias.</p></div><div class=\"space-y-4\"><a href=\"/login\" class=\"block w-full rounded-full bg-red-700 px-6 py-3.5 text-lg font-bold text-white shadow-sm transition-colors hover:bg-red-800\">Iniciar sesión</a> <a href=\"/register\" class=\"block w-full rounded-full border-2 border-gray-200 bg-white px-6 py-3.5 text-lg font-bold text-gray-900 transition-colors hover:bg-gray-50\">Registrarse</a></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
