@@ -148,6 +148,50 @@ func (r *PostRepository) ToggleLike(userID, postID int) (bool, error) {
 	return true, nil
 }
 
+func (r *PostRepository) GetPostByID(postID int) (*models.Post, error) {
+	query := `SELECT p.id, p.user_id, u.username, u.name, u.avatar_url, p.content, p.created_at, p.image_url, p.parent_id,
+		(SELECT COUNT(*) FROM likes WHERE post_id = p.id) AS likes_count,
+		(SELECT COUNT(*) FROM posts WHERE parent_id = p.id) AS replies_count
+		FROM posts p
+		JOIN users u ON p.user_id = u.id
+		WHERE p.id = $1`
+
+	var post models.Post
+	err := r.db.QueryRow(query, postID).Scan(
+		&post.ID, &post.UserID, &post.Author, &post.AuthorName, &post.AuthorAvatarURL,
+		&post.Content, &post.CreatedAt, &post.ImageURL, &post.ParentID,
+		&post.LikesCount, &post.RepliesCount,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error getting post: %w", err)
+	}
+	return &post, nil
+}
+
+func (r *PostRepository) UpdatePost(postID, userID int, content, imageURL string) error {
+	result, err := r.db.Exec("UPDATE posts SET content = $1, image_url = $2 WHERE id = $3 AND user_id = $4", content, imageURL, postID, userID)
+	if err != nil {
+		return fmt.Errorf("error updating post: %w", err)
+	}
+	rows, _ := result.RowsAffected()
+	if rows == 0 {
+		return fmt.Errorf("post not found or not authorized")
+	}
+	return nil
+}
+
+func (r *PostRepository) DeletePost(postID, userID int) error {
+	result, err := r.db.Exec("DELETE FROM posts WHERE id = $1 AND user_id = $2", postID, userID)
+	if err != nil {
+		return fmt.Errorf("error deleting post: %w", err)
+	}
+	rows, _ := result.RowsAffected()
+	if rows == 0 {
+		return fmt.Errorf("post not found or not authorized")
+	}
+	return nil
+}
+
 func (r *PostRepository) GetLikesCount(postID int) (int, error) {
 	var count int
 	err := r.db.QueryRow("SELECT COUNT(*) FROM likes WHERE post_id = $1", postID).Scan(&count)

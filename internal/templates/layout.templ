@@ -21,14 +21,10 @@ templ Layout(title string, user *models.User) {
 			<!-- Left Sidebar (1/4) -->
 			<header class="col-span-1 h-screen sticky top-0 flex flex-col justify-between py-3 px-2">
 				<div>
-					<!-- Logo / Avatar -->
-					<div class="mb-4 px-3">
-						<a href="/" class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-tr from-red-600 to-red-800 text-white font-bold text-xl hover:opacity-90 transition overflow-hidden">
-							if user != nil && user.AvatarURL != "" {
-								<img src={ templ.URL(user.AvatarURL + "?v=" + fmt.Sprint(time.Now().Unix())) } alt="Avatar" class="w-12 h-12 rounded-full object-cover"/>
-							} else {
-								M
-							}
+					<!-- Brand Logo -->
+					<div class="mb-8 px-3">
+						<a href="/" class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-red-600 to-red-800 text-white shadow-md hover:scale-105 transition-transform">
+							<span class="font-extrabold text-xl tracking-tight">N</span>
 						</a>
 					</div>
 

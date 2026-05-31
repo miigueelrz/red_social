@@ -13,8 +13,11 @@ type PostRepository interface {
 	CreatePost(post *Post) error
 	GetRecentPosts(currentUserID int) ([]Post, error)
 	GetReplies(postID, currentUserID int) ([]Post, error)
+	GetPostByID(postID int) (*Post, error)
+	UpdatePost(postID, userID int, content, imageURL string) error
 	ToggleLike(userID, postID int) (bool, error)
 	GetLikesCount(postID int) (int, error)
+	DeletePost(postID, userID int) error
 }
 
 type PostService struct {
@@ -80,6 +83,18 @@ func (s *PostService) getRepliesTree(postID, currentUserID int) ([]Post, error) 
 	}
 
 	return replies, nil
+}
+
+func (s *PostService) GetPostByID(postID int) (*Post, error) {
+	return s.postRepo.GetPostByID(postID)
+}
+
+func (s *PostService) UpdatePost(postID, userID int, content, imageURL string) error {
+	return s.postRepo.UpdatePost(postID, userID, content, imageURL)
+}
+
+func (s *PostService) DeletePost(postID, userID int) error {
+	return s.postRepo.DeletePost(postID, userID)
 }
 
 func (s *PostService) ToggleLike(userID, postID int) (int, bool, error) {

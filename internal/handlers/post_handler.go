@@ -154,13 +154,205 @@ func (h *PostHandler) HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if parentID != nil {
-		component := templates.ReplyItem(*post)
+		component := templates.ReplyItem(*post, int(userID), 0)
 		component.Render(r.Context(), w)
 		return
 	}
 
-	component := templates.PostItem(*post)
+	component := templates.PostItem(*post, int(userID), 0)
 	component.Render(r.Context(), w)
+}
+
+func deleteImageFile(imageURL string) {
+	if imageURL == "" {
+		return
+	}
+	filePath := "." + imageURL
+	if err := os.Remove(filePath); err != nil && !os.IsNotExist(err) {
+		log.Printf("WARN: could not delete old image %s: %v", filePath, err)
+	}
+}
+
+func (h *PostHandler) HandleViewPost(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(middleware.UserIDKey).(int64)
+	if !ok {
+		writeHTMXError(w, "No autorizado.", http.StatusUnauthorized)
+		return
+	}
+
+	postIDStr := r.PathValue("id")
+	postID, err := strconv.Atoi(postIDStr)
+	if err != nil {
+		writeHTMXError(w, "ID inválido.", http.StatusBadRequest)
+		return
+	}
+
+	post, err := h.postService.GetPostByID(postID)
+	if err != nil {
+		writeHTMXError(w, "Publicación no encontrada.", http.StatusNotFound)
+		return
+	}
+
+	if post.ParentID != nil {
+		component := templates.ReplyItem(*post, int(userID), 0)
+		component.Render(r.Context(), w)
+		return
+	}
+
+	component := templates.PostItem(*post, int(userID), 0)
+	component.Render(r.Context(), w)
+}
+
+func (h *PostHandler) HandleEditPostGET(w http.ResponseWriter, r *http.Request) {
+	postIDStr := r.PathValue("id")
+	postID, err := strconv.Atoi(postIDStr)
+	if err != nil {
+		writeHTMXError(w, "ID inválido.", http.StatusBadRequest)
+		return
+	}
+
+	post, err := h.postService.GetPostByID(postID)
+	if err != nil {
+		writeHTMXError(w, "Publicación no encontrada.", http.StatusNotFound)
+		return
+	}
+
+	component := templates.PostEditForm(*post)
+	component.Render(r.Context(), w)
+}
+
+func (h *PostHandler) HandleEditPostPUT(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, maxPostUploadSize)
+
+	mediaType, _, _ := mime.ParseMediaType(r.Header.Get("Content-Type"))
+	isMultipart := mediaType == "multipart/form-data"
+	if isMultipart {
+		if err := r.ParseMultipartForm(10 << 20); err != nil {
+			writeHTMXError(w, "No se pudo procesar el formulario o la imagen supera los 20 MB.", http.StatusBadRequest)
+			return
+		}
+	} else {
+		if err := r.ParseForm(); err != nil {
+			writeHTMXError(w, "Error al procesar el formulario.", http.StatusBadRequest)
+			return
+		}
+	}
+
+	userID, ok := r.Context().Value(middleware.UserIDKey).(int64)
+	if !ok {
+		writeHTMXError(w, "No autorizado.", http.StatusUnauthorized)
+		return
+	}
+
+	postIDStr := r.PathValue("id")
+	postID, err := strconv.Atoi(postIDStr)
+	if err != nil {
+		writeHTMXError(w, "ID inválido.", http.StatusBadRequest)
+		return
+	}
+
+	content := r.FormValue("content")
+	removeImage := r.FormValue("remove_image") == "1"
+
+	var imageURL string
+	existingPost, err := h.postService.GetPostByID(postID)
+	if err != nil {
+		writeHTMXError(w, "Publicación no encontrada.", http.StatusNotFound)
+		return
+	}
+
+	if removeImage {
+		deleteImageFile(existingPost.ImageURL)
+		imageURL = ""
+	} else if isMultipart {
+		file, header, err := r.FormFile("image")
+		if err == nil {
+			defer file.Close()
+
+			allowedExts := map[string]bool{
+				".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".webp": true,
+			}
+			ext := filepath.Ext(header.Filename)
+			if !allowedExts[ext] {
+				writeHTMXError(w, "Formato de imagen no soportado. Usa JPG, PNG, GIF o WebP.", http.StatusBadRequest)
+				return
+			}
+
+			uploadDir := "./static/uploads"
+			if err := os.MkdirAll(uploadDir, 0755); err != nil {
+				log.Printf("ERROR creating upload dir %s: %v", uploadDir, err)
+				writeHTMXError(w, "Error interno al preparar el directorio de imágenes. Intenta de nuevo.", http.StatusInternalServerError)
+				return
+			}
+
+			filename := fmt.Sprintf("%d%s", time.Now().UnixNano(), ext)
+			dst, err := os.Create(filepath.Join(uploadDir, filename))
+			if err != nil {
+				log.Printf("ERROR creating file %s: %v", filename, err)
+				writeHTMXError(w, "Error interno al guardar la imagen. Intenta de nuevo.", http.StatusInternalServerError)
+				return
+			}
+			defer dst.Close()
+
+			if _, err := io.Copy(dst, file); err != nil {
+				log.Printf("ERROR copying file %s: %v", filename, err)
+				writeHTMXError(w, "Error interno al guardar la imagen. Intenta de nuevo.", http.StatusInternalServerError)
+				return
+			}
+
+			deleteImageFile(existingPost.ImageURL)
+			imageURL = "/static/uploads/" + filename
+		} else if err != http.ErrMissingFile {
+			writeHTMXError(w, "Error al leer el archivo subido.", http.StatusBadRequest)
+			return
+		} else {
+			imageURL = existingPost.ImageURL
+		}
+	} else {
+		imageURL = existingPost.ImageURL
+	}
+
+	if err := h.postService.UpdatePost(postID, int(userID), content, imageURL); err != nil {
+		writeHTMXError(w, "No se pudo actualizar la publicación.", http.StatusInternalServerError)
+		return
+	}
+
+	updatedPost, err := h.postService.GetPostByID(postID)
+	if err != nil {
+		writeHTMXError(w, "Error al obtener la publicación actualizada.", http.StatusInternalServerError)
+		return
+	}
+
+	if updatedPost.ParentID != nil {
+		component := templates.ReplyItem(*updatedPost, int(userID), 0)
+		component.Render(r.Context(), w)
+		return
+	}
+
+	component := templates.PostItem(*updatedPost, int(userID), 0)
+	component.Render(r.Context(), w)
+}
+
+func (h *PostHandler) HandleDeletePost(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(middleware.UserIDKey).(int64)
+	if !ok {
+		writeHTMXError(w, "No autorizado.", http.StatusUnauthorized)
+		return
+	}
+
+	postIDStr := r.PathValue("id")
+	postID, err := strconv.Atoi(postIDStr)
+	if err != nil {
+		writeHTMXError(w, "ID inválido.", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.postService.DeletePost(postID, int(userID)); err != nil {
+		writeHTMXError(w, "No se pudo eliminar la publicación.", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *PostHandler) HandleToggleLike(w http.ResponseWriter, r *http.Request) {

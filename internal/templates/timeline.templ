@@ -8,10 +8,8 @@ import (
 
 templ TimelineContent(user *models.User, posts []models.Post) {
 	<div class="max-w-2xl mx-auto px-3 py-4">
-		<!-- Logout -->
-		<div class="flex items-center justify-between px-1 pb-4">
+		<div class="pb-4">
 			<h1 class="text-2xl font-bold tracking-tight text-gray-950">Inicio</h1>
-			<button hx-post="/logout" class="rounded-full px-4 py-2 text-sm font-semibold text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600">Cerrar sesión</button>
 		</div>
 
 		<!-- Create Post -->
@@ -47,7 +45,7 @@ templ TimelineContent(user *models.User, posts []models.Post) {
 		<!-- Post List -->
 		<div id="post-list" class="space-y-3">
 			for _, post := range posts {
-				@PostItem(post)
+				@PostItem(post, int(user.ID), 0)
 			}
 		</div>
 		<script>
@@ -68,6 +66,14 @@ templ TimelineContent(user *models.User, posts []models.Post) {
 				preview.removeAttribute("src");
 				preview.classList.add("hidden");
 			}
+
+			document.addEventListener("click", function (e) {
+				document.querySelectorAll(".post-menu-dropdown").forEach(function (m) {
+					if (!m.parentElement.contains(e.target)) {
+						m.classList.add("hidden");
+					}
+				});
+			});
 
 			document.addEventListener("change", function (event) {
 				if (event.target.id !== "image-upload") return;
@@ -96,8 +102,8 @@ templ Timeline(user *models.User, posts []models.Post) {
 	}
 }
 
-templ PostItem(post models.Post) {
-	<div class="rounded-2xl border border-gray-200 bg-white px-4 py-4 shadow-sm transition-colors hover:bg-gray-50">
+templ PostItem(post models.Post, currentUserID int, depth int) {
+	<div class="rounded-2xl border border-gray-200 bg-white px-4 py-4 shadow-sm transition-colors hover:bg-gray-50 post-container">
 		<div class="flex gap-3">
 			<div class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-tr from-red-600 to-red-800 flex items-center justify-center text-white font-bold text-sm uppercase shadow-sm">
 				if post.AuthorAvatarURL != "" {
@@ -117,7 +123,20 @@ templ PostItem(post models.Post) {
 							{ post.Author }
 						}
 					</span>
-					<span class="text-gray-500 text-sm whitespace-nowrap">{ post.CreatedAt.Format(time.RFC822) }</span>
+					<span class="text-gray-500 text-sm whitespace-nowrap">{ TimeAgo(post.CreatedAt) }</span>
+					<div class="relative ml-auto post-menu-btn" onclick="event.stopPropagation()">
+						<button onclick="var m=this.nextElementSibling;var o=m.classList.contains('hidden');document.querySelectorAll('.post-menu-dropdown').forEach(function(x){x.classList.add('hidden')});if(o)m.classList.remove('hidden')" class="p-1 rounded-full hover:bg-gray-200 transition">
+							<svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+						</button>
+						<div class="hidden absolute right-0 top-full mt-1 w-48 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden z-50 post-menu-dropdown">
+							if post.UserID == currentUserID {
+								<button hx-get={ "/posts/" + fmt.Sprint(post.ID) + "/edit" } hx-target="closest .post-container" hx-swap="innerHTML" class="w-full text-left px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">Editar</button>
+								<button hx-delete={ "/posts/" + fmt.Sprint(post.ID) } hx-confirm="¿Seguro que quieres eliminar esta publicación?" hx-target="closest .post-container" hx-swap="outerHTML" class="w-full text-left px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50 transition">Eliminar</button>
+							} else {
+								<button class="w-full text-left px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">Reportar</button>
+							}
+						</div>
+					</div>
 				</div>
 				<div class="text-gray-900 whitespace-pre-wrap text-base leading-relaxed mt-1">{ post.Content }</div>
 				if post.ImageURL != "" {
@@ -141,9 +160,9 @@ templ PostItem(post models.Post) {
 						</form>
 					</div>
 				</div>
-				<div id={ "replies-" + fmt.Sprint(post.ID) } class="mt-3 ml-6 space-y-3 border-l-2 border-gray-200 pl-4">
+				<div id={ "replies-" + fmt.Sprint(post.ID) } class={ "mt-3 space-y-3", templ.KV("ml-0 pl-4 border-l-2 border-gray-200", depth < 3) }>
 					for _, reply := range post.Replies {
-						@ReplyItem(reply)
+						@ReplyItem(reply, currentUserID, depth + 1)
 					}
 				</div>
 			</div>
@@ -151,8 +170,8 @@ templ PostItem(post models.Post) {
 	</div>
 }
 
-templ ReplyItem(post models.Post) {
-	<div class="py-3">
+templ ReplyItem(post models.Post, currentUserID int, depth int) {
+	<div class="py-3 post-container">
 		<div class="flex gap-3">
 			<div class="w-8 h-8 shrink-0 rounded-full bg-gradient-to-tr from-red-600 to-red-800 flex items-center justify-center text-white text-sm font-bold uppercase shadow-sm">
 				if post.AuthorAvatarURL != "" {
@@ -172,7 +191,20 @@ templ ReplyItem(post models.Post) {
 							{ post.Author }
 						}
 					</span>
-					<span class="text-gray-500 text-xs whitespace-nowrap">{ post.CreatedAt.Format(time.RFC822) }</span>
+					<span class="text-gray-500 text-xs whitespace-nowrap">{ TimeAgo(post.CreatedAt) }</span>
+					<div class="relative ml-auto post-menu-btn" onclick="event.stopPropagation()">
+						<button onclick="var m=this.nextElementSibling;var o=m.classList.contains('hidden');document.querySelectorAll('.post-menu-dropdown').forEach(function(x){x.classList.add('hidden')});if(o)m.classList.remove('hidden')" class="p-1 rounded-full hover:bg-gray-200 transition">
+							<svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+						</button>
+						<div class="hidden absolute right-0 top-full mt-1 w-48 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden z-50 post-menu-dropdown">
+							if post.UserID == currentUserID {
+								<button hx-get={ "/posts/" + fmt.Sprint(post.ID) + "/edit" } hx-target="closest .post-container" hx-swap="innerHTML" class="w-full text-left px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">Editar</button>
+								<button hx-delete={ "/posts/" + fmt.Sprint(post.ID) } hx-confirm="¿Seguro que quieres eliminar esta publicación?" hx-target="closest .post-container" hx-swap="outerHTML" class="w-full text-left px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50 transition">Eliminar</button>
+							} else {
+								<button class="w-full text-left px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">Reportar</button>
+							}
+						</div>
+					</div>
 				</div>
 				<div class="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-gray-900">{ post.Content }</div>
 				if post.ImageURL != "" {
@@ -196,11 +228,52 @@ templ ReplyItem(post models.Post) {
 						</form>
 					</div>
 				</div>
-				<div id={ "replies-" + fmt.Sprint(post.ID) } class="mt-2 ml-5 space-y-2 border-l-2 border-gray-200 pl-4">
+				<div id={ "replies-" + fmt.Sprint(post.ID) } class={ "mt-2 space-y-2", templ.KV("ml-8 pl-4 border-l-2 border-gray-200", depth < 3) }>
 					for _, reply := range post.Replies {
-						@ReplyItem(reply)
+						@ReplyItem(reply, currentUserID, depth + 1)
 					}
 				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ PostEditForm(post models.Post) {
+	<div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+		<div class="flex gap-3">
+			<div class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-tr from-red-600 to-red-800 flex items-center justify-center text-white font-bold text-sm uppercase shadow-sm">
+				if post.AuthorAvatarURL != "" {
+					<img src={ templ.URL(post.AuthorAvatarURL) } alt="Avatar" class="w-10 h-10 rounded-full object-cover"/>
+				} else if len(post.Author) > 0 {
+					{ string(post.Author[0]) }
+				} else {
+					?
+				}
+			</div>
+			<div class="flex-1">
+				<form hx-put={ "/posts/" + fmt.Sprint(post.ID) } hx-target="closest .post-container" hx-swap="outerHTML" hx-encoding="multipart/form-data">
+					<textarea name="content" class="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 p-3 text-base leading-relaxed text-gray-900 outline-none transition focus:border-red-200 focus:bg-white focus:ring-4 focus:ring-red-50">{ post.Content }</textarea>
+					if post.ImageURL != "" {
+						<div class="mt-3">
+							<img src={ post.ImageURL } class="max-h-60 w-full rounded-xl border border-gray-200 object-cover shadow-sm"/>
+							<label class="mt-2 inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 transition">
+								<input type="checkbox" name="remove_image" value="1" class="rounded border-gray-300 text-red-600 focus:ring-red-500"/>
+								Eliminar imagen
+							</label>
+						</div>
+					}
+					<div class="mt-3 flex flex-wrap items-center gap-3">
+						<label class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50">
+							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+							<span>Cambiar imagen</span>
+							<input type="file" name="image" accept="image/*" class="sr-only"/>
+						</label>
+					</div>
+					<div class="mt-4 flex justify-end gap-3 border-t border-gray-100 pt-4">
+						<button type="button" hx-get={ "/posts/" + fmt.Sprint(post.ID) + "/view" } hx-target="closest .post-container" hx-swap="outerHTML" class="rounded-full px-5 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100">Cancelar</button>
+						<button type="submit" class="rounded-full bg-red-700 px-6 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-100">Guardar</button>
+					</div>
+				</form>
 			</div>
 		</div>
 	</div>

@@ -52,7 +52,11 @@ func main() {
 
 	mux.Handle("GET /", authMiddleware.OptionalAuth(http.HandlerFunc(postHandler.HandleGetTimeline)))
 	mux.Handle("POST /posts", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleCreatePost)))
+	mux.Handle("GET /posts/{id}/view", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleViewPost)))
+	mux.Handle("GET /posts/{id}/edit", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleEditPostGET)))
+	mux.Handle("PUT /posts/{id}", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleEditPostPUT)))
 	mux.Handle("POST /posts/{id}/like", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleToggleLike)))
+	mux.Handle("DELETE /posts/{id}", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleDeletePost)))
 
 	mux.Handle("GET /profile", authMiddleware.RequireAuth(http.HandlerFunc(userHandler.HandleGetProfile)))
 	mux.Handle("POST /profile/edit", authMiddleware.RequireAuth(http.HandlerFunc(userHandler.HandleEditProfile)))
