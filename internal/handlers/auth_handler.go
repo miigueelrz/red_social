@@ -15,9 +15,9 @@ import (
 )
 
 type AuthHandler struct {
-	authService    *services.AuthService
-	sessionRepo    *repositories.SessionRepository
-	sessionExpiry  time.Duration
+	authService   *services.AuthService
+	sessionRepo   *repositories.SessionRepository
+	sessionExpiry time.Duration
 }
 
 func NewAuthHandler(authService *services.AuthService, sessionRepo *repositories.SessionRepository) *AuthHandler {
@@ -127,5 +127,5 @@ func (h *AuthHandler) LogoutPOST(w http.ResponseWriter, r *http.Request) {
 		MaxAge:   -1,
 	})
 
-	w.Header().Set("HX-Redirect", "/login")
+	w.Header().Set("HX-Redirect", "/")
 }
