@@ -1,0 +1,22 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  bin = "tmp/server"
+  cmd = "templ generate && go build -o tmp/server ./cmd/web"
+  delay = 300
+  exclude_dir = ["tmp", "static/uploads", ".git"]
+  include_ext = ["go", "templ", "html", "css", "js"]
+  exclude_regex = [".*_templ\\.go"]
+  stop_on_error = false
+  log = "build-errors.log"
+  args_bin = []
+
+[log]
+  time = true
+
+[color]
+  main = "magenta"
+  watch = "cyan"
+  build = "yellow"
+  runner = "green"

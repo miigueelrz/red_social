@@ -26,10 +26,11 @@ func writeHTMXError(w http.ResponseWriter, msg string, status int) {
 
 type PostHandler struct {
 	postService *services.PostService
+	userService *services.UserService
 }
 
-func NewPostHandler(postService *services.PostService) *PostHandler {
-	return &PostHandler{postService: postService}
+func NewPostHandler(postService *services.PostService, userService *services.UserService) *PostHandler {
+	return &PostHandler{postService: postService, userService: userService}
 }
 
 const maxPostUploadSize = 20 << 20
@@ -41,7 +42,12 @@ func (h *PostHandler) HandleGetTimeline(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	username, _ := r.Context().Value(middleware.UsernameKey).(string)
+	user, err := h.userService.GetProfile(userID)
+	if err != nil {
+		log.Printf("ERROR getting user profile in timeline: %v", err)
+		writeHTMXError(w, "Error al cargar el usuario.", http.StatusInternalServerError)
+		return
+	}
 
 	posts, err := h.postService.GetTimeline(int(userID))
 	if err != nil {
@@ -49,7 +55,7 @@ func (h *PostHandler) HandleGetTimeline(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	component := templates.Timeline(username, posts)
+	component := templates.Timeline(user, posts)
 	component.Render(r.Context(), w)
 }
 
@@ -139,8 +145,12 @@ func (h *PostHandler) HandleCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	username, _ := r.Context().Value(middleware.UsernameKey).(string)
-	post.Author = username
+	user, _ := r.Context().Value(middleware.UserKey).(*models.User)
+	if user != nil {
+		post.Author = user.Username
+		post.AuthorName = user.Name
+		post.AuthorAvatarURL = user.AvatarURL
+	}
 
 	if parentID != nil {
 		component := templates.ReplyItem(*post)

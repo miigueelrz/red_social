@@ -14,6 +14,7 @@ type contextKey string
 
 const UserIDKey contextKey = "user_id"
 const UsernameKey contextKey = "username"
+const UserKey contextKey = "user"
 
 type AuthMiddleware struct {
 	sessionRepo *repositories.SessionRepository
@@ -53,6 +54,7 @@ func (m *AuthMiddleware) RequireAuth(next http.Handler) http.Handler {
 
 		ctx := context.WithValue(r.Context(), UserIDKey, session.UserID)
 		ctx = context.WithValue(ctx, UsernameKey, user.Username)
+		ctx = context.WithValue(ctx, UserKey, user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

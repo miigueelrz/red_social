@@ -29,9 +29,11 @@ func main() {
 
 	authService := services.NewAuthService(userRepo)
 	postService := services.NewPostService(postRepo)
+	userService := services.NewUserService(userRepo)
 
 	authHandler := handlers.NewAuthHandler(authService, sessionRepo)
-	postHandler := handlers.NewPostHandler(postService)
+	postHandler := handlers.NewPostHandler(postService, userService)
+	userHandler := handlers.NewUserHandler(userService)
 	authMiddleware := middleware.NewAuthMiddleware(sessionRepo, userRepo)
 
 	mux := http.NewServeMux()
@@ -51,6 +53,9 @@ func main() {
 	mux.Handle("GET /", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleGetTimeline)))
 	mux.Handle("POST /posts", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleCreatePost)))
 	mux.Handle("POST /posts/{id}/like", authMiddleware.RequireAuth(http.HandlerFunc(postHandler.HandleToggleLike)))
+
+	mux.Handle("GET /profile", authMiddleware.RequireAuth(http.HandlerFunc(userHandler.HandleGetProfile)))
+	mux.Handle("POST /profile/edit", authMiddleware.RequireAuth(http.HandlerFunc(userHandler.HandleEditProfile)))
 
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 

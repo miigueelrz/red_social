@@ -39,7 +39,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: red_social_app
     restart: unless-stopped
     depends_on:
@@ -52,10 +52,10 @@ services:
       JWT_SECRET:   ${JWT_SECRET:-cambiar_esto_por_un_secreto_seguro}
     ports:
       - "${PORT:-8080}:8080"
-    # Montar directorio de uploads para persistencia de imágenes
-    # y para que el contenedor pueda escribir en él (appuser necesita escritura)
+    # Montar TODO el código fuente para que air detecte cambios
+    # y los uploaded files persistan en el host
     volumes:
-      - ./static/uploads:/app/static/uploads
+      - .:/app
 
 # =============================================================
 # Volúmenes nombrados

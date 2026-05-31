@@ -1,0 +1,21 @@
+FROM golang:1.26-alpine
+
+RUN apk add --no-cache git
+
+# Cache de modulos (se ejecuta antes de copiar el source)
+WORKDIR /app
+COPY go.mod go.sum* ./
+RUN go mod download
+
+# Herramientas de desarrollo: templ + air (hot-reload)
+RUN go install github.com/a-h/templ/cmd/templ@latest && \
+    go install github.com/air-verse/air@latest
+
+# Directorio de uploads (root en dev, sin problemas de permisos)
+RUN mkdir -p /app/static/uploads
+
+COPY . .
+
+EXPOSE 8080
+
+CMD ["air"]

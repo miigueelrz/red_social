@@ -6,93 +6,103 @@ import (
 	"time"
 )
 
-templ Timeline(username string, posts []models.Post) {
-	@Layout("Muro", username) {
-		<div class="max-w-2xl mx-auto px-3 py-4">
-			<!-- Logout -->
-			<div class="flex items-center justify-between px-1 pb-4">
-				<h1 class="text-2xl font-bold tracking-tight text-gray-950">Inicio</h1>
-				<button hx-post="/logout" class="rounded-full px-4 py-2 text-sm font-semibold text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600">Cerrar sesión</button>
-			</div>
-
-			<!-- Create Post -->
-			<div class="mb-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-				<form id="create-post-form" hx-post="/posts" hx-target="#post-list" hx-swap="afterbegin" hx-on::after-request="if (event.detail.successful) { this.reset(); clearImagePreview(); clearPostError(); }" hx-on::response-error="showPostError(event.detail.xhr.responseText)" hx-encoding="multipart/form-data">
-					<div class="flex gap-3">
-						<div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-600 text-base font-bold uppercase text-white shadow-sm">
-							{ string(username[0]) }
-						</div>
-						<div class="flex-1">
-							<textarea name="content" placeholder="¿Qué está pasando?" class="min-h-[110px] w-full resize-none rounded-xl border border-gray-100 bg-gray-50 p-3 text-base leading-relaxed text-gray-900 outline-none transition focus:border-blue-200 focus:bg-white focus:ring-4 focus:ring-blue-50" required></textarea>
-							<img id="image-preview" class="hidden mt-3 max-h-80 w-full rounded-2xl border border-gray-200 object-cover shadow-sm"/>
-							<div class="mt-3 flex flex-wrap items-center gap-3">
-								<label for="image-upload" class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:border-blue-200 hover:bg-blue-100">
-									<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-									<span>Subir imagen</span>
-								</label>
-								<input id="image-upload" type="file" name="image" accept="image/*" class="sr-only"/>
-								<p id="post-error" class="min-h-5 text-sm font-medium text-red-600"></p>
-							</div>
-						</div>
-					</div>
-					<div class="mt-4 flex justify-end border-t border-gray-100 pt-4">
-						<button type="submit" class="rounded-full bg-blue-600 px-6 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100">Publicar</button>
-					</div>
-				</form>
-			</div>
-
-			<!-- Post List -->
-			<div id="post-list" class="space-y-3">
-				for _, post := range posts {
-					@PostItem(post)
-				}
-			</div>
-			<script>
-				function clearPostError() {
-					const error = document.getElementById("post-error");
-					if (error) error.textContent = "";
-				}
-
-				function showPostError(message) {
-					const error = document.getElementById("post-error");
-					if (error) error.textContent = message || "No se pudo publicar el post.";
-				}
-
-				function clearImagePreview() {
-					const preview = document.getElementById("image-preview");
-					if (!preview) return;
-					if (preview.src) URL.revokeObjectURL(preview.src);
-					preview.removeAttribute("src");
-					preview.classList.add("hidden");
-				}
-
-				document.addEventListener("change", function (event) {
-					if (event.target.id !== "image-upload") return;
-
-					const preview = document.getElementById("image-preview");
-					const file = event.target.files && event.target.files[0];
-					if (!preview) return;
-
-					if (!file) {
-						clearImagePreview();
-						return;
-					}
-
-					if (preview.src) URL.revokeObjectURL(preview.src);
-					preview.src = URL.createObjectURL(file);
-					preview.classList.remove("hidden");
-					clearPostError();
-				});
-			</script>
+templ TimelineContent(user *models.User, posts []models.Post) {
+	<div class="max-w-2xl mx-auto px-3 py-4">
+		<!-- Logout -->
+		<div class="flex items-center justify-between px-1 pb-4">
+			<h1 class="text-2xl font-bold tracking-tight text-gray-950">Inicio</h1>
+			<button hx-post="/logout" class="rounded-full px-4 py-2 text-sm font-semibold text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600">Cerrar sesión</button>
 		</div>
+
+		<!-- Create Post -->
+		<div class="mb-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+			<form id="create-post-form" hx-post="/posts" hx-target="#post-list" hx-swap="afterbegin" hx-on::after-request="if (event.detail.successful) { this.reset(); clearImagePreview(); clearPostError(); }" hx-on::response-error="showPostError(event.detail.xhr.responseText)" hx-encoding="multipart/form-data">
+				<div class="flex gap-3">
+					<div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-600 text-base font-bold uppercase text-white shadow-sm">
+						if user.AvatarURL != "" {
+		<img src={ templ.URL(user.AvatarURL + "?v=" + fmt.Sprint(time.Now().Unix())) } alt="Avatar" class="h-11 w-11 rounded-full object-cover"/>
+	} else {
+		{ string(user.Username[0]) }
+	}
+					</div>
+					<div class="flex-1">
+						<textarea name="content" placeholder="¿Qué está pasando?" class="min-h-[110px] w-full resize-none rounded-xl border border-gray-100 bg-gray-50 p-3 text-base leading-relaxed text-gray-900 outline-none transition focus:border-blue-200 focus:bg-white focus:ring-4 focus:ring-blue-50" required></textarea>
+						<img id="image-preview" class="hidden mt-3 max-h-80 w-full rounded-2xl border border-gray-200 object-cover shadow-sm"/>
+						<div class="mt-3 flex flex-wrap items-center gap-3">
+							<label for="image-upload" class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:border-blue-200 hover:bg-blue-100">
+								<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+								<span>Subir imagen</span>
+							</label>
+							<input id="image-upload" type="file" name="image" accept="image/*" class="sr-only"/>
+							<p id="post-error" class="min-h-5 text-sm font-medium text-red-600"></p>
+						</div>
+					</div>
+				</div>
+				<div class="mt-4 flex justify-end border-t border-gray-100 pt-4">
+					<button type="submit" class="rounded-full bg-blue-600 px-6 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100">Publicar</button>
+				</div>
+			</form>
+		</div>
+
+		<!-- Post List -->
+		<div id="post-list" class="space-y-3">
+			for _, post := range posts {
+				@PostItem(post)
+			}
+		</div>
+		<script>
+			function clearPostError() {
+				const error = document.getElementById("post-error");
+				if (error) error.textContent = "";
+			}
+
+			function showPostError(message) {
+				const error = document.getElementById("post-error");
+				if (error) error.textContent = message || "No se pudo publicar el post.";
+			}
+
+			function clearImagePreview() {
+				const preview = document.getElementById("image-preview");
+				if (!preview) return;
+				if (preview.src) URL.revokeObjectURL(preview.src);
+				preview.removeAttribute("src");
+				preview.classList.add("hidden");
+			}
+
+			document.addEventListener("change", function (event) {
+				if (event.target.id !== "image-upload") return;
+
+				const preview = document.getElementById("image-preview");
+				const file = event.target.files && event.target.files[0];
+				if (!preview) return;
+
+				if (!file) {
+					clearImagePreview();
+					return;
+				}
+
+				if (preview.src) URL.revokeObjectURL(preview.src);
+				preview.src = URL.createObjectURL(file);
+				preview.classList.remove("hidden");
+				clearPostError();
+			});
+		</script>
+	</div>
+}
+
+templ Timeline(user *models.User, posts []models.Post) {
+	@Layout("Muro", user) {
+		@TimelineContent(user, posts)
 	}
 }
 
 templ PostItem(post models.Post) {
 	<div class="rounded-2xl border border-gray-200 bg-white px-4 py-4 shadow-sm transition-colors hover:bg-gray-50">
 		<div class="flex gap-3">
-			<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 font-bold uppercase text-white shadow-sm">
-				if len(post.Author) > 0 {
+			<div class="w-10 h-10 shrink-0 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm uppercase shadow-sm">
+				if post.AuthorAvatarURL != "" {
+					<img src={ templ.URL(post.AuthorAvatarURL + "?v=" + fmt.Sprint(time.Now().Unix())) } alt="Avatar" class="w-10 h-10 rounded-full object-cover"/>
+				} else if len(post.Author) > 0 {
 					{ string(post.Author[0]) }
 				} else {
 					?
@@ -100,7 +110,13 @@ templ PostItem(post models.Post) {
 			</div>
 			<div class="flex-1 min-w-0">
 				<div class="flex items-center gap-2">
-					<span class="font-bold text-gray-900 text-sm truncate">{ post.Author }</span>
+					<span class="font-bold text-gray-900 text-sm truncate">
+						if post.AuthorName != "" {
+							{ post.AuthorName }
+						} else {
+							{ post.Author }
+						}
+					</span>
 					<span class="text-gray-500 text-sm whitespace-nowrap">{ post.CreatedAt.Format(time.RFC822) }</span>
 				</div>
 				<div class="text-gray-900 whitespace-pre-wrap text-base leading-relaxed mt-1">{ post.Content }</div>
@@ -114,13 +130,14 @@ templ PostItem(post models.Post) {
 						<span class="text-sm">Responder</span>
 					</button>
 					<div class="mt-3 hidden w-full rounded-xl border border-gray-100 bg-gray-50 p-3">
-						<form hx-post="/posts" hx-target={ "#replies-" + fmt.Sprint(post.ID) } hx-swap="afterbegin" hx-on::after-request="if (event.detail.successful) this.reset()" hx-encoding="multipart/form-data">
+						<form hx-post="/posts" hx-target={ "#replies-" + fmt.Sprint(post.ID) } hx-swap="afterbegin" hx-on::after-request="if (event.detail.successful) { this.parentElement.classList.add('hidden'); this.reset(); }" hx-on::response-error="this.querySelector('.reply-err').textContent = event.detail.xhr.responseText" hx-encoding="multipart/form-data">
 							<input type="hidden" name="parent_id" value={ fmt.Sprint(post.ID) }/>
 							<textarea name="content" placeholder="Escribe tu respuesta..." class="w-full rounded-xl border border-gray-200 bg-white p-3 text-sm focus:outline-none focus:ring-4 focus:ring-blue-50" required></textarea>
 							<div class="mt-2 flex flex-wrap items-center justify-between gap-3">
 								<input type="file" name="image" accept="image/*" class="text-sm text-gray-500 file:mr-3 file:rounded-full file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"/>
 								<button type="submit" class="rounded-full bg-blue-600 px-4 py-1.5 text-sm font-bold text-white transition-colors hover:bg-blue-700">Responder</button>
 							</div>
+							<p class="reply-err mt-2 text-sm font-medium text-red-600"></p>
 						</form>
 					</div>
 				</div>
@@ -137,8 +154,10 @@ templ PostItem(post models.Post) {
 templ ReplyItem(post models.Post) {
 	<div class="py-3">
 		<div class="flex gap-3">
-			<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 text-sm font-bold uppercase text-white">
-				if len(post.Author) > 0 {
+			<div class="w-8 h-8 shrink-0 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold uppercase shadow-sm">
+				if post.AuthorAvatarURL != "" {
+					<img src={ templ.URL(post.AuthorAvatarURL + "?v=" + fmt.Sprint(time.Now().Unix())) } alt="Avatar" class="w-8 h-8 rounded-full object-cover"/>
+				} else if len(post.Author) > 0 {
 					{ string(post.Author[0]) }
 				} else {
 					?
@@ -146,7 +165,13 @@ templ ReplyItem(post models.Post) {
 			</div>
 			<div class="flex-1 min-w-0">
 				<div class="flex items-center gap-2">
-					<span class="font-bold text-gray-900 text-sm truncate">{ post.Author }</span>
+					<span class="font-bold text-gray-900 text-sm truncate">
+						if post.AuthorName != "" {
+							{ post.AuthorName }
+						} else {
+							{ post.Author }
+						}
+					</span>
 					<span class="text-gray-500 text-xs whitespace-nowrap">{ post.CreatedAt.Format(time.RFC822) }</span>
 				</div>
 				<div class="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-gray-900">{ post.Content }</div>
@@ -160,13 +185,14 @@ templ ReplyItem(post models.Post) {
 						<span class="text-xs">Responder</span>
 					</button>
 					<div class="mt-2 hidden w-full rounded-xl border border-gray-100 bg-gray-50 p-3">
-						<form hx-post="/posts" hx-target={ "#replies-" + fmt.Sprint(post.ID) } hx-swap="afterbegin" hx-on::after-request="if (event.detail.successful) this.reset()" hx-encoding="multipart/form-data">
+						<form hx-post="/posts" hx-target={ "#replies-" + fmt.Sprint(post.ID) } hx-swap="afterbegin" hx-on::after-request="if (event.detail.successful) { this.parentElement.classList.add('hidden'); this.reset(); }" hx-on::response-error="this.querySelector('.reply-err').textContent = event.detail.xhr.responseText" hx-encoding="multipart/form-data">
 							<input type="hidden" name="parent_id" value={ fmt.Sprint(post.ID) }/>
 							<textarea name="content" placeholder="Escribe tu respuesta..." class="w-full rounded-xl border border-gray-200 bg-white p-3 text-sm focus:outline-none focus:ring-4 focus:ring-blue-50" required></textarea>
 							<div class="mt-2 flex flex-wrap items-center justify-between gap-3">
 								<input type="file" name="image" accept="image/*" class="text-sm text-gray-500 file:mr-3 file:rounded-full file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"/>
 								<button type="submit" class="rounded-full bg-blue-600 px-4 py-1.5 text-sm font-bold text-white transition-colors hover:bg-blue-700">Responder</button>
 							</div>
+							<p class="reply-err mt-2 text-sm font-medium text-red-600"></p>
 						</form>
 					</div>
 				</div>

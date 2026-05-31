@@ -35,7 +35,7 @@ func (r *PostRepository) CreatePost(post *models.Post) error {
 }
 
 func (r *PostRepository) GetRecentPosts(currentUserID int) ([]models.Post, error) {
-	query := `SELECT p.id, p.user_id, u.username, p.content, p.created_at, p.image_url, p.parent_id,
+	query := `SELECT p.id, p.user_id, u.username, u.name, u.avatar_url, p.content, p.created_at, p.image_url, p.parent_id,
 		(SELECT COUNT(*) FROM likes WHERE post_id = p.id) AS likes_count,
 		(SELECT COUNT(*) FROM posts WHERE parent_id = p.id) AS replies_count,
 		EXISTS(SELECT 1 FROM likes WHERE post_id = p.id AND user_id = $1) AS user_liked
@@ -59,7 +59,7 @@ func (r *PostRepository) GetRecentPosts(currentUserID int) ([]models.Post, error
 	var posts []models.Post
 	for rows.Next() {
 		var post models.Post
-		err := rows.Scan(&post.ID, &post.UserID, &post.Author, &post.Content, &post.CreatedAt, &post.ImageURL, &post.ParentID, &post.LikesCount, &post.RepliesCount, &post.UserLiked)
+		err := rows.Scan(&post.ID, &post.UserID, &post.Author, &post.AuthorName, &post.AuthorAvatarURL, &post.Content, &post.CreatedAt, &post.ImageURL, &post.ParentID, &post.LikesCount, &post.RepliesCount, &post.UserLiked)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning post row: %w", err)
 		}
@@ -74,7 +74,7 @@ func (r *PostRepository) GetRecentPosts(currentUserID int) ([]models.Post, error
 }
 
 func (r *PostRepository) GetReplies(postID, currentUserID int) ([]models.Post, error) {
-	query := `SELECT p.id, p.user_id, u.username, p.content, p.created_at, p.image_url, p.parent_id,
+	query := `SELECT p.id, p.user_id, u.username, u.name, u.avatar_url, p.content, p.created_at, p.image_url, p.parent_id,
 		(SELECT COUNT(*) FROM likes WHERE post_id = p.id) AS likes_count,
 		(SELECT COUNT(*) FROM posts WHERE parent_id = p.id) AS replies_count,
 		EXISTS(SELECT 1 FROM likes WHERE post_id = p.id AND user_id = $2) AS user_liked
@@ -98,7 +98,7 @@ func (r *PostRepository) GetReplies(postID, currentUserID int) ([]models.Post, e
 	var posts []models.Post
 	for rows.Next() {
 		var post models.Post
-		err := rows.Scan(&post.ID, &post.UserID, &post.Author, &post.Content, &post.CreatedAt, &post.ImageURL, &post.ParentID, &post.LikesCount, &post.RepliesCount, &post.UserLiked)
+		err := rows.Scan(&post.ID, &post.UserID, &post.Author, &post.AuthorName, &post.AuthorAvatarURL, &post.Content, &post.CreatedAt, &post.ImageURL, &post.ParentID, &post.LikesCount, &post.RepliesCount, &post.UserLiked)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning reply row: %w", err)
 		}
